@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: deepakgehlot/nginx:latest
+    ports:
+      - "80:80"
+    command: ["nginx", "-g", "daemon off;"]
+
