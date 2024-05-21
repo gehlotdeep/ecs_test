@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+    
+    stages {
+        
+        stage("code"){
+            steps{
+                git url: "https://github.com/gehlotdeep/ecs_test.git", branch: "main"
+                echo 'cloning the code'
+            }
+        }
+        stage("build and test"){
+            steps{
+                sh "docker build -t nginx ."
+                echo 'Building the code'
+            }
+        }
+        stage("scan image"){
+            steps{
+                echo 'image scanning'
+            }
+        }
+        stage("push"){
+            steps{
+                withCredentials([usernamePassword(credentialsId:"dockerhub",passwordVariable:"dockerhubPass",usernameVariable:"dockerhubUser")]){
+                sh "docker login -u ${env.dockerhubUser} -p ${env.dockerhubPass}"
+                sh "docker tag nginx:latest ${env.dockerhubUser}/nginx:latest"
+                sh "docker push ${env.dockerhubUser}/nginx:latest"
+                echo 'Image push to docker Hub'
+                }
+            }
+        }
+        stage("deploy"){
+            steps{
+                sh "docker-compose down && docker-compose up -d"
+                echo 'Deployment face'
+            }
+        }
+    }
+}
